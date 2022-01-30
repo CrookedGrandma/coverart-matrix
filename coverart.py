@@ -1,33 +1,27 @@
-import time
-import sys, os
+from samplebase import SampleBase
+from random import randint
+import math
 
-from rgbmatrix import RGBMatrix, RGBMatrixOptions
-from PIL import Image
+class TestBoy(SampleBase):
+    def __init__(self, *args, **kwargs):
+        super(TestBoy, self).__init__(*args, **kwargs)
+    
+    def col(self, val, mult):
+        w = self.matrix.width
+        f = val / w
+        f2pi = 2 * math.pi * f
+        return math.floor((math.sin(mult * f2pi) + 1) / 2 * 255)
+    
+    def run(self):
+        offset_canvas = self.matrix.CreateFrameCanvas()
+        while True:
+            for x in range(0, self.matrix.width):
+                for y in range(0, self.matrix.height):
+                    offset_canvas.SetPixel(x, y, self.col(x+y, 1), self.col(x+y, 1.4), self.col(x+y, 1.8))
+            offset_canvas = self.matrix.SwapOnVSync(offset_canvas)
 
-if len(sys.argv) < 2:
-    image_file = "testimg.png"
-else:
-    image_file = sys.argv[1]
 
-image_file = os.path.join(os.path.dirname(__file__), image_file)
-image = Image.open(image_file)
-
-options = RGBMatrixOptions()
-options.rows = 32
-options.cols = 32
-options.chain_length = 1
-options.parallel = 1
-options.hardware_mapping = "regular"
-
-matrix = RGBMatrix(options=options)
-
-image.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
-
-matrix.SetImage(image.convert('RGB'))
-
-try:
-    print("Press CTRL-C to stop.")
-    while True:
-        time.sleep(100)
-except KeyboardInterrupt:
-    sys.exit(0)
+if __name__ == "__main__":
+    testboy = TestBoy()
+    if (not testboy.process()):
+        testboy.print_help()
