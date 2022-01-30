@@ -1,14 +1,15 @@
 import time
-import sys
+import sys, os
 
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from PIL import Image
 
 if len(sys.argv) < 2:
-    image_file = "./testimg.png"
+    image_file = "testimg.png"
 else:
     image_file = sys.argv[1]
 
+image_file = os.path.join(os.path.dirname(__file__), image_file)
 image = Image.open(image_file)
 
 options = RGBMatrixOptions()
@@ -22,7 +23,7 @@ matrix = RGBMatrix(options=options)
 
 image.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
 
-matrix.SetImage(image.convert("RGB"))
+matrix.SetImage(image.convert('RGB'))
 
 try:
     print("Press CTRL-C to stop.")
