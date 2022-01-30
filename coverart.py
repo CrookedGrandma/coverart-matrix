@@ -20,7 +20,7 @@ options.hardware_mapping = "regular"
 
 matrix = RGBMatrix(options=options)
 
-image.thumbnail((32, 32), Image.ANTIALIAS)
+image.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
 
 matrix.SetImage(image.convert("RGB"))
 
