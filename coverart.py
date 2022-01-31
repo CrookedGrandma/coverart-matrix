@@ -22,7 +22,6 @@ class TestBoy(SampleBase):
 
 
 if __name__ == "__main__":
-    
     testboy = TestBoy()
-    if (not testboy.process()):
+    if not testboy.process():
         testboy.print_help()
