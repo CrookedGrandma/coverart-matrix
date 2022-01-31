@@ -4,9 +4,9 @@ from spotipy.oauth2 import SpotifyOAuth
 from dotenv import load_dotenv
 load_dotenv()
 
-scope = "user-library-read"
+scope = "user-read-currently-playing"
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
-track = sp.track("https://open.spotify.com/track/6G8sFs8Nw2yQ6zHLmSSb7r?si=9e4ef55df05b4338")
-imgurl = track["album"]["images"][2]
+track = sp.current_user_playing_track()
+imgurl = track["item"]["album"]["images"][2]["url"]
