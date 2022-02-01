@@ -3,11 +3,12 @@ from samplebase import SampleBase
 import numpy as np
 import sys
 
+
 class TestBoy(SampleBase):
     def __init__(self, *args, **kwargs):
         super(TestBoy, self).__init__(*args, **kwargs)
         self.parser.add_argument("-i", "--img", help="The image to show", default="./testimg2.png")
-    
+
     def run(self):
         img = Image.open(self.args.img)
         img.thumbnail((self.matrix.width, self.matrix.height), Image.ANTIALIAS)
