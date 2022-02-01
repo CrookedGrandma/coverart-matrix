@@ -1,9 +1,9 @@
 import os
 import sys
 import time
+import threading
 from configparser import ConfigParser
 from flask import Flask, render_template, request, redirect
-from stoppablethread import StoppableThread
 
 app = Flask(__name__)
 
@@ -17,21 +17,25 @@ rgb_thread = None
 
 
 def _start_rgb(brightness):
-    print("test")
-    time.sleep(10)
-    print(f"test later, brightness = {brightness}")
+    t = threading.current_thread()
+    t.alive = True
+    while t.alive:
+        print("alive at", time.strftime("%H:%M:%S", time.localtime()))
+        time.sleep(1)
 
 
 def start_rgb(brightness=100):
     global rgb_thread
-    rgb_thread = StoppableThread(target=_start_rgb, name="RGB Matrix", args=(brightness,))
+    rgb_thread = threading.Thread(target=_start_rgb, name="RGB Matrix", args=(brightness,))
     rgb_thread.start()
 
 
 def stop_rgb():
     global rgb_thread
     if rgb_thread is not None:
-        rgb_thread.stop()
+        rgb_thread.alive = False
+        print("thread.alive set to False")
+        rgb_thread.join()
 
 
 @app.route('/')
