@@ -51,6 +51,7 @@ class RGBHandler:
         self.options = dict(brightness=100, power=False)
 
     def _start_rgb(self, brightness):
+        print("Brightness at thread:", brightness)
         options = RGBMatrixOptions()
         options.rows = 32
         options.cols = 32
@@ -75,6 +76,7 @@ class RGBHandler:
         self.matrix.SwapOnVSync(self.matrix.CreateFrameCanvas())
 
     def start(self, brightness=None):
+        print("Brightness at start:", brightness)
         self.options["power"] = True
         self.rgb_thread = threading.Thread(target=self._start_rgb, name="RGB Matrix", args=(brightness,))
         self.rgb_thread.start()
@@ -87,6 +89,7 @@ class RGBHandler:
             self.rgb_thread.join()
 
     def set_brightness(self, brightness):
+        print("Brightness at set_brightness:", brightness)
         self.stop()
         self.start(brightness)
 
@@ -143,6 +146,7 @@ def handle_power():
 @app.route('/brightness', methods=["POST"])
 def handle_brightness():
     brightness = request.form["brightness"]
+    print("Brightness at route:", brightness)
     rgb.set_brightness(brightness)
     # restart RGB with given brightness
     return redirect('/')
