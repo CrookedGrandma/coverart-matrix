@@ -1,11 +1,13 @@
+import numpy as np
 import os
-import requests
 import spotipy
 import time
 import threading
 from configparser import ConfigParser
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect
+from rgbmatrix import RGBMatrix, RGBMatrixOptions
+from PIL import Image
 from urllib.parse import urlencode
 
 load_dotenv()
@@ -43,11 +45,23 @@ if dcfg["token"] != "":
 
 
 def _start_rgb(brightness):
+    options = RGBMatrixOptions()
+    options.rows = 32
+    options.cols = 32
+    options.brightness = brightness
+    matrix = RGBMatrix(options=options)
+    img = Image.open("testimg2.png")
+    img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
+    img = img.convert("RGB")
+    px = np.array(img)
+    offset_canvas = matrix.CreateFrameCanvas()
     t = threading.current_thread()
     t.alive = True
     while t.alive:
-        print("alive at", time.strftime("%H:%M:%S", time.localtime()))
-        time.sleep(1)
+        for x in range(0, matrix.width):
+            for y in range(0, matrix.height):
+                offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
+        offset_canvas = matrix.SwapOnVSync(offset_canvas)
 
 
 def start_rgb(brightness=100):
