@@ -60,17 +60,17 @@ class RGBHandler:
             options.brightness = brightness
             self.options["brightness"] = brightness
         self.matrix = RGBMatrix(options=options)
-        # img = Image.open("testimg2.png")
-        # img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
-        # img = img.convert("RGB")
-        # px = np.array(img)
-        # offset_canvas = matrix.CreateFrameCanvas()
+        img = Image.open("testimg2.png")
+        img.thumbnail((self.matrix.width, self.matrix.height), Image.ANTIALIAS)
+        img = img.convert("RGB")
+        px = np.array(img)
+        offset_canvas = self.matrix.CreateFrameCanvas()
         self.alive = True
         while self.alive:
-            # for x in range(0, matrix.width):
-            #     for y in range(0, matrix.height):
-            #         offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
-            # offset_canvas = matrix.SwapOnVSync(offset_canvas)
+            for x in range(0, self.matrix.width):
+                for y in range(0, self.matrix.height):
+                    offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
+            offset_canvas = self.matrix.SwapOnVSync(offset_canvas)
             print("alive at", time.strftime("%H:%M:%S", time.localtime()))
             time.sleep(1)
 
