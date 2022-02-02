@@ -97,7 +97,7 @@ rgb = RGBHandler()
 
 @app.route('/')
 def main_page():
-    power = rgb.options["power"]
+    power = "on" if rgb.options["power"] else "off"
     brightness = rgb.options["brightness"]
     token = dcfg["token"]
     name = sp.me()["display_name"] if sp is not None else ""
