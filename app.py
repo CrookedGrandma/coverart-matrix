@@ -46,16 +46,16 @@ if dcfg["token"] != "":
 
 
 def _start_rgb(brightness):
-    # options = RGBMatrixOptions()
-    # options.rows = 32
-    # options.cols = 32
-    # options.brightness = brightness
-    # matrix = RGBMatrix(options=options)
-    # img = Image.open("testimg2.png")
-    # img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
-    # img = img.convert("RGB")
-    # px = np.array(img)
-    # offset_canvas = matrix.CreateFrameCanvas()
+    options = RGBMatrixOptions()
+    options.rows = 32
+    options.cols = 32
+    options.brightness = brightness
+    matrix = RGBMatrix(options=options)
+    img = Image.open("testimg2.png")
+    img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
+    img = img.convert("RGB")
+    px = np.array(img)
+    offset_canvas = matrix.CreateFrameCanvas()
     t = threading.current_thread()
     t.alive = True
     while t.alive:
@@ -64,6 +64,7 @@ def _start_rgb(brightness):
         #         offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
         # offset_canvas = matrix.SwapOnVSync(offset_canvas)
         print("alive at", time.strftime("%H:%M:%S", time.localtime()))
+        time.sleep(1)
 
 
 def start_rgb(brightness=100):
