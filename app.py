@@ -50,7 +50,7 @@ def _start_rgb(brightness):
     options.rows = 32
     options.cols = 32
     options.brightness = brightness
-    matrix = RGBMatrix(options=options)
+    # matrix = RGBMatrix(options=options)
     # img = Image.open("testimg2.png")
     # img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
     # img = img.convert("RGB")
