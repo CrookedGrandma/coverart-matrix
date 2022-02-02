@@ -48,7 +48,7 @@ class RGBHandler:
         self.matrix = None
         self.rgb_thread = None
         self.alive = False
-        self.options = dict(brightness=100, power=True)
+        self.options = dict(brightness=100, power=False)
 
     def _start_rgb(self, brightness):
         options = RGBMatrixOptions()
@@ -87,7 +87,6 @@ class RGBHandler:
             self.rgb_thread.join()
 
     def set_brightness(self, brightness):
-        self.options = brightness
         self.stop()
         self.start(brightness)
 
