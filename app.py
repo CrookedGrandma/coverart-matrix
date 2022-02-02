@@ -50,7 +50,7 @@ def _start_rgb(brightness):
     options.rows = 32
     options.cols = 32
     options.brightness = brightness
-    # matrix = RGBMatrix(options=options)
+    matrix = RGBMatrix(options=options)
     # img = Image.open("testimg2.png")
     # img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
     # img = img.convert("RGB")
@@ -65,6 +65,7 @@ def _start_rgb(brightness):
         # offset_canvas = matrix.SwapOnVSync(offset_canvas)
         print("alive at", time.strftime("%H:%M:%S", time.localtime()))
         time.sleep(1)
+    del matrix
 
 
 def start_rgb(brightness=100):
@@ -123,8 +124,10 @@ def handle_power():
     if power == "on":
         write_cfg("power", power)
         start_rgb(brightness)
+        print("RGB thread: ", rgb_thread)
     else:
         stop_rgb()
+        print("RGB thread: ", rgb_thread)
         write_cfg("power", power)
     return redirect('/')
 
