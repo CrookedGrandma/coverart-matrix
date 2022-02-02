@@ -71,7 +71,7 @@ class RGBHandler:
         del self.matrix
 
     def start(self, brightness=100):
-        self.rgb_thread = threading.Thread(target=self._start_rgb, name="RGB Matrix", args=(self, brightness))
+        self.rgb_thread = threading.Thread(target=self._start_rgb, name="RGB Matrix", args=(brightness,))
         self.rgb_thread.start()
 
     def stop(self):
