@@ -42,7 +42,13 @@
 
 <main class="container">
 
-    <div class="starter-template py-5 px-3">
+    <div class="py-5 px-3">
+        {% if token=='' %}
+        <h1>Login to Spotify</h1>
+            <form action="/login" method="POST">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        {% else %}
         <h1>Settings</h1>
         <form action="/brightness" method="POST">
             <div class="form-group">
@@ -61,9 +67,10 @@
                                              class="btn btn-danger" value="off"/>
             </div>
         </form>
+    {% endif %}
     </div>
 
-</main><!-- /.container -->
+</main>
 
 
 <script src="/static/bootstrap.min.js"></script>
