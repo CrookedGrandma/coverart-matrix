@@ -72,6 +72,7 @@ class RGBHandler:
                 for y in range(0, self.matrix.height):
                     offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
             offset_canvas = self.matrix.SwapOnVSync(offset_canvas)
+        self.matrix.SwapOnVSync(self.matrix.CreateFrameCanvas())
 
     def start(self, brightness=None):
         self.options["power"] = True
