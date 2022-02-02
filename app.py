@@ -26,6 +26,7 @@ def write_cfg(name, val):
     cfg.set(d, name, val)
     with open(cfgfile, "w") as configfile:
         cfg.write(configfile)
+        configfile.close()
 
 
 def test_sp_connection():
@@ -117,11 +118,12 @@ def handle_login_callback():
 def handle_power():
     power = request.form["power"]
     brightness = int(dcfg["brightness"])
-    write_cfg("power", power)
     if power == "on":
+        write_cfg("power", power)
         start_rgb(brightness)
     else:
         stop_rgb()
+        write_cfg("power", power)
     return redirect('/')
 
 
