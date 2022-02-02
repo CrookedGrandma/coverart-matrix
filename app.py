@@ -51,11 +51,11 @@ def _start_rgb(brightness):
     options.cols = 32
     options.brightness = brightness
     matrix = RGBMatrix(options=options)
-    img = Image.open("testimg2.png")
-    img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
-    img = img.convert("RGB")
-    px = np.array(img)
-    offset_canvas = matrix.CreateFrameCanvas()
+    # img = Image.open("testimg2.png")
+    # img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
+    # img = img.convert("RGB")
+    # px = np.array(img)
+    # offset_canvas = matrix.CreateFrameCanvas()
     t = threading.current_thread()
     t.alive = True
     while t.alive:
