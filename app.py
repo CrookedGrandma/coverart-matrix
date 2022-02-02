@@ -145,7 +145,7 @@ def handle_power():
 
 @app.route('/brightness', methods=["POST"])
 def handle_brightness():
-    brightness = request.form["brightness"]
+    brightness = int(request.form["brightness"])
     print("Brightness at route:", brightness)
     rgb.set_brightness(brightness)
     # restart RGB with given brightness
