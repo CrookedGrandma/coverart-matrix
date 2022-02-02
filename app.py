@@ -1,11 +1,13 @@
 import numpy as np
 import os
+import requests
 import spotipy
 import time
 import threading
 from configparser import ConfigParser
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect
+from io import BytesIO
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from PIL import Image
 from urllib.parse import urlencode
@@ -27,20 +29,7 @@ def write_cfg(name, val):
         configfile.close()
 
 
-def test_sp_connection():
-    global sp
-    try:
-        sp.me()
-    except spotipy.exceptions.SpotifyException:
-        write_cfg("token", "")
-        sp = None
-
-
 scope = "user-read-currently-playing"
-sp = None
-if dcfg["token"] != "":
-    sp = spotipy.Spotify(auth=dcfg["token"])
-    test_sp_connection()
 
 
 class RGBHandler:
@@ -49,6 +38,33 @@ class RGBHandler:
         self.rgb_thread = None
         self.alive = False
         self.options = dict(brightness=100, power=False)
+        self.sp = None
+        self.currentimg = None
+        self.currentpx = None
+
+    def get_img(self):
+        track = self.sp.current_user_playing_track()
+        if track is None:
+            url = "black"
+        else:
+            url = track["item"]["album"]["images"][0]["url"]
+        if url == self.currentimg:
+            return self.currentpx
+        else:
+            self.currentimg = url
+            if url == "black":
+                img = Image.open("black.png")
+            else:
+                try:
+                    img = Image.open(BytesIO(requests.get(url).content))
+                except requests.RequestException as e:
+                    img = Image.open("black.png")
+                    print(e)
+            img.thumbnail((self.matrix.width, self.matrix.height), Image.ANTIALIAS)
+            img = img.convert("RGB")
+            px = np.array(img)
+            self.currentpx = px
+            return px
 
     def _start_rgb(self, brightness):
         print("Brightness at thread:", brightness)
@@ -61,18 +77,17 @@ class RGBHandler:
             options.brightness = brightness
             self.options["brightness"] = brightness
         self.matrix = RGBMatrix(options=options)
-        img = Image.open("testimg2.png")
-        img.thumbnail((self.matrix.width, self.matrix.height), Image.ANTIALIAS)
-        img = img.convert("RGB")
-        px = np.array(img)
         offset_canvas = self.matrix.CreateFrameCanvas()
         t = threading.current_thread()
         t.alive = True
         while t.alive:
+            px = self.get_img()
             for x in range(0, self.matrix.width):
                 for y in range(0, self.matrix.height):
                     offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
             offset_canvas = self.matrix.SwapOnVSync(offset_canvas)
+            time.sleep(5)
+
         self.matrix.SwapOnVSync(self.matrix.CreateFrameCanvas())
 
     def start(self, brightness=None):
@@ -93,8 +108,18 @@ class RGBHandler:
         self.stop()
         self.start(brightness)
 
+    def test_sp_connection(self):
+        try:
+            self.sp.me()
+        except spotipy.exceptions.SpotifyException:
+            write_cfg("token", "")
+            self.sp = None
+
 
 rgb = RGBHandler()
+if dcfg["token"] != "":
+    rgb.sp = spotipy.Spotify(auth=dcfg["token"])
+    rgb.test_sp_connection()
 
 
 @app.route('/')
