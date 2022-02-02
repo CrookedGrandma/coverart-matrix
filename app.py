@@ -65,8 +65,9 @@ class RGBHandler:
         img = img.convert("RGB")
         px = np.array(img)
         offset_canvas = self.matrix.CreateFrameCanvas()
-        self.alive = True
-        while self.alive:
+        t = threading.current_thread()
+        t.alive = True
+        while t.alive:
             for x in range(0, self.matrix.width):
                 for y in range(0, self.matrix.height):
                     offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
@@ -79,8 +80,8 @@ class RGBHandler:
 
     def stop(self):
         self.options["power"] = False
-        self.alive = False
         if self.rgb_thread is not None:
+            self.rgb_thread.alive = False
             print("attempting to turn off matrix")
             self.rgb_thread.join()
 
