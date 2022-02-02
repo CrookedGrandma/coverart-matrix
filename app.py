@@ -19,8 +19,6 @@ cfg.read(cfgfile)
 d = "DEFAULT"
 dcfg = cfg[d]
 
-rgb_thread = None
-
 
 def write_cfg(name, val):
     cfg.set(d, name, val)
@@ -45,41 +43,46 @@ if dcfg["token"] != "":
     test_sp_connection()
 
 
-def _start_rgb(brightness):
-    options = RGBMatrixOptions()
-    options.rows = 32
-    options.cols = 32
-    options.brightness = brightness
-    matrix = RGBMatrix(options=options)
-    # img = Image.open("testimg2.png")
-    # img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
-    # img = img.convert("RGB")
-    # px = np.array(img)
-    # offset_canvas = matrix.CreateFrameCanvas()
-    t = threading.current_thread()
-    t.alive = True
-    while t.alive:
-        # for x in range(0, matrix.width):
-        #     for y in range(0, matrix.height):
-        #         offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
-        # offset_canvas = matrix.SwapOnVSync(offset_canvas)
-        print("alive at", time.strftime("%H:%M:%S", time.localtime()))
-        time.sleep(1)
-    del matrix
+class RGBHandler:
+    def __init__(self):
+        self.matrix = None
+        self.rgb_thread = None
+        self.alive = False
+
+    def _start_rgb(self, brightness):
+        options = RGBMatrixOptions()
+        options.rows = 32
+        options.cols = 32
+        options.brightness = brightness
+        self.matrix = RGBMatrix(options=options)
+        # img = Image.open("testimg2.png")
+        # img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
+        # img = img.convert("RGB")
+        # px = np.array(img)
+        # offset_canvas = matrix.CreateFrameCanvas()
+        self.alive = True
+        while self.alive:
+            # for x in range(0, matrix.width):
+            #     for y in range(0, matrix.height):
+            #         offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
+            # offset_canvas = matrix.SwapOnVSync(offset_canvas)
+            print("alive at", time.strftime("%H:%M:%S", time.localtime()))
+            time.sleep(1)
+        del self.matrix
+
+    def start(self, brightness=100):
+        self.rgb_thread = threading.Thread(target=self._start_rgb, name="RGB Matrix", args=(self, brightness))
+        self.rgb_thread.start()
+
+    def stop(self):
+        self.alive = False
+        if self.rgb_thread is not None:
+            print("attempting to turn off matrix")
+            self.rgb_thread.join()
+            del self.rgb_thread
 
 
-def start_rgb(brightness=100):
-    global rgb_thread
-    rgb_thread = threading.Thread(target=_start_rgb, name="RGB Matrix", args=(brightness,))
-    rgb_thread.start()
-
-
-def stop_rgb():
-    global rgb_thread
-    if rgb_thread is not None:
-        rgb_thread.alive = False
-        print("thread.alive set to False")
-        rgb_thread.join()
+rgb = RGBHandler()
 
 
 @app.route('/')
@@ -123,11 +126,11 @@ def handle_power():
     brightness = int(dcfg["brightness"])
     if power == "on":
         write_cfg("power", power)
-        start_rgb(brightness)
-        print("RGB thread: ", rgb_thread)
+        rgb.start(brightness)
+        print("RGB thread: ", rgb.rgb_thread)
     else:
-        stop_rgb()
-        print("RGB thread: ", rgb_thread)
+        rgb.stop()
+        print("RGB thread: ", rgb.rgb_thread)
         write_cfg("power", power)
     return redirect('/')
 
