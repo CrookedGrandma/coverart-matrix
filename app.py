@@ -20,20 +20,26 @@ dcfg = cfg[d]
 rgb_thread = None
 
 
-def test_sp_connection(sp):
+def write_cfg(name, val):
+    cfg.set(d, name, val)
+    with open(cfgfile, "w") as configfile:
+        cfg.write(configfile)
+
+
+def test_sp_connection():
+    global sp
     try:
         sp.me()
     except spotipy.exceptions.SpotifyException:
-        cfg.set(d, "token", "")
-        with open(cfgfile, "w") as configfile:
-            cfg.write(configfile)
+        write_cfg("token", "")
+        sp = None
 
 
 scope = "user-read-currently-playing"
 sp = None
 if dcfg["token"] != "":
     sp = spotipy.Spotify(auth=dcfg["token"])
-    test_sp_connection(sp)
+    test_sp_connection()
 
 
 def _start_rgb(brightness):
@@ -63,7 +69,9 @@ def main_page():
     power = dcfg["power"]
     brightness = int(dcfg["brightness"])
     token = dcfg["token"]
-    return render_template("index.html", power=power, brightness=brightness, token=token)
+    name = sp.me()["display_name"] if sp is not None else ""
+    img = sp.me()["images"][0]["url"] if sp is not None else ""
+    return render_template("index.html", power=power, brightness=brightness, token=token, name=name, img=img)
 
 
 @app.route('/login', methods=["POST"])
@@ -74,16 +82,20 @@ def handle_login():
         scope=scope,
         redirect_uri=os.getenv("SPOTIPY_REDIRECT_URI"))
     )
-    return redirect(f"https://accounts.spotify.com/authorize?{getparams}")
+    url = f"https://accounts.spotify.com/authorize?{getparams}"
+    # print("Redirecting to", url)
+    return redirect(url)
 
 
-@app.route('/logincallback')
-def handle_login_done():
+@app.route('/logincallback', methods=["GET", "POST"])
+def handle_login_callback():
     code = request.args.get("code")
-    # POST request to 'https://accounts.spotify.com/api/token'
+    auth = spotipy.SpotifyOAuth()
+    token = auth.get_access_token(code=code, as_dict=False)
+    write_cfg("token", token)
     global sp
-    sp = spotipy.Spotify(auth=code)
-    test_sp_connection(sp)
+    sp = spotipy.Spotify(auth=token)
+    test_sp_connection()
     return redirect("/")
 
 
@@ -91,9 +103,7 @@ def handle_login_done():
 def handle_power():
     power = request.form["power"]
     brightness = int(dcfg["brightness"])
-    cfg.set(d, "power", power)
-    with open(cfgfile, "w") as configfile:
-        cfg.write(configfile)
+    write_cfg("power", power)
     if power == "on":
         start_rgb(brightness)
     else:

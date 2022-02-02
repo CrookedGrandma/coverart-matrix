@@ -9,17 +9,9 @@
     <link href="/static/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        .bd-placeholder-img {
-            font-size: 1.125rem;
-            text-anchor: middle;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-        }
-
-        @media (min-width: 768px) {
-            .bd-placeholder-img-lg {
-                font-size: 3.5rem;
+        @media (max-width: 768px) {
+            #img-loggedin {
+                width: 128px;
             }
         }
 
@@ -44,30 +36,33 @@
 
     <div class="py-5 px-3">
         {% if token=='' %}
-        <h1>Login to Spotify</h1>
+            <h1>Login to Spotify</h1>
             <form action="/login" method="POST">
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
         {% else %}
-        <h1>Settings</h1>
-        <form action="/brightness" method="POST">
-            <div class="form-group">
-                <label for="formControlRange">Brightness</label>
-                <input min="10" type="range" class="form-control-range" id="formControlRange" step="10"
-                       name="brightness" value="{{ brightness }}">
-                <button type="submit" class="btn btn-primary">Update</button>
-            </div>
-        </form>
-        <form action="/power" method="POST">
-            <div class="form-group">
-                <label>Power</label>
-                <input {% if power=='on' %} disabled="disabled" {% endif %} type="submit" name="power"
-                                            class="btn btn-success" value="on"/>
-                <input {% if power=='off' %} disabled="disabled" {% endif %} type="submit" name="power"
-                                             class="btn btn-danger" value="off"/>
-            </div>
-        </form>
-    {% endif %}
+            <p>Logged in: {{ name }}</p>
+            <img id="img-loggedin" src="{{ img }}" width="64px" alt="profile picture">
+            <hr>
+            <h1>Settings</h1>
+            <form action="/brightness" method="POST">
+                <div class="form-group">
+                    <label for="formControlRange">Brightness</label>
+                    <input min="10" type="range" class="form-control-range" id="formControlRange" step="10"
+                           name="brightness" value="{{ brightness }}">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+            <form action="/power" method="POST">
+                <div class="form-group">
+                    <label>Power</label>
+                    <input {% if power=='on' %} disabled="disabled" {% endif %} type="submit" name="power"
+                                                class="btn btn-success" value="on"/>
+                    <input {% if power=='off' %} disabled="disabled" {% endif %} type="submit" name="power"
+                                                 class="btn btn-danger" value="off"/>
+                </div>
+            </form>
+        {% endif %}
     </div>
 
 </main>
