@@ -127,5 +127,13 @@ def handle_power():
     return redirect('/')
 
 
+@app.route('/brightness', methods=["POST"])
+def handle_brightness():
+    brightness = request.form["brightness"]
+    write_cfg("brightness", brightness)
+    # restart RGB with given brightness
+    return redirect('/')
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)
