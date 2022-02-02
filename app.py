@@ -19,8 +19,6 @@ cfg.read(cfgfile)
 d = "DEFAULT"
 dcfg = cfg[d]
 
-rgb_thread = None
-
 
 def write_cfg(name, val):
     cfg.set(d, name, val)
@@ -45,44 +43,62 @@ if dcfg["token"] != "":
     test_sp_connection()
 
 
-def _start_rgb(brightness):
-    options = RGBMatrixOptions()
-    options.rows = 32
-    options.cols = 32
-    options.brightness = brightness
-    matrix = RGBMatrix(options=options)
-    img = Image.open("testimg2.png")
-    img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
-    img = img.convert("RGB")
-    px = np.array(img)
-    offset_canvas = matrix.CreateFrameCanvas()
-    t = threading.current_thread()
-    t.alive = True
-    while t.alive:
-        for x in range(0, matrix.width):
-            for y in range(0, matrix.height):
-                offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
-        offset_canvas = matrix.SwapOnVSync(offset_canvas)
+class RGBHandler:
+    def __init__(self):
+        self.matrix = None
+        self.rgb_thread = None
+        self.alive = False
+        self.options = dict(brightness=100, power=True)
+
+    def _start_rgb(self, brightness):
+        options = RGBMatrixOptions()
+        options.rows = 32
+        options.cols = 32
+        if brightness is None:
+            options.brightness = self.options["brightness"]
+        else:
+            options.brightness = brightness
+            self.options["brightness"] = brightness
+        self.matrix = RGBMatrix(options=options)
+        # img = Image.open("testimg2.png")
+        # img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
+        # img = img.convert("RGB")
+        # px = np.array(img)
+        # offset_canvas = matrix.CreateFrameCanvas()
+        self.alive = True
+        while self.alive:
+            # for x in range(0, matrix.width):
+            #     for y in range(0, matrix.height):
+            #         offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
+            # offset_canvas = matrix.SwapOnVSync(offset_canvas)
+            print("alive at", time.strftime("%H:%M:%S", time.localtime()))
+            time.sleep(1)
+
+    def start(self, brightness=None):
+        self.options["power"] = True
+        self.rgb_thread = threading.Thread(target=self._start_rgb, name="RGB Matrix", args=(brightness,))
+        self.rgb_thread.start()
+
+    def stop(self):
+        self.options["power"] = False
+        self.alive = False
+        if self.rgb_thread is not None:
+            print("attempting to turn off matrix")
+            self.rgb_thread.join()
+
+    def set_brightness(self, brightness):
+        self.options = brightness
+        self.stop()
+        self.start(brightness)
 
 
-def start_rgb(brightness=100):
-    global rgb_thread
-    rgb_thread = threading.Thread(target=_start_rgb, name="RGB Matrix", args=(brightness,))
-    rgb_thread.start()
-
-
-def stop_rgb():
-    global rgb_thread
-    if rgb_thread is not None:
-        rgb_thread.alive = False
-        print("thread.alive set to False")
-        rgb_thread.join()
+rgb = RGBHandler()
 
 
 @app.route('/')
 def main_page():
-    power = dcfg["power"]
-    brightness = int(dcfg["brightness"])
+    power = "on" if rgb.options["power"] else "off"
+    brightness = rgb.options["brightness"]
     token = dcfg["token"]
     name = sp.me()["display_name"] if sp is not None else ""
     img = sp.me()["images"][0]["url"] if sp is not None else ""
@@ -117,13 +133,11 @@ def handle_login_callback():
 @app.route('/power', methods=["POST"])
 def handle_power():
     power = request.form["power"]
-    brightness = int(dcfg["brightness"])
     if power == "on":
-        write_cfg("power", power)
-        start_rgb(brightness)
+        rgb.start()
+        print("RGB thread: ", rgb.rgb_thread)
     else:
-        stop_rgb()
-        write_cfg("power", power)
+        rgb.stop()
     return redirect('/')
 
 
