@@ -127,8 +127,8 @@ def main_page():
     power = "on" if rgb.options["power"] else "off"
     brightness = rgb.options["brightness"]
     token = dcfg["token"]
-    name = sp.me()["display_name"] if sp is not None else ""
-    img = sp.me()["images"][0]["url"] if sp is not None else ""
+    name = rgb.sp.me()["display_name"] if rgb.sp is not None else ""
+    img = rgb.sp.me()["images"][0]["url"] if rgb.sp is not None else ""
     return render_template("index.html", power=power, brightness=brightness, token=token, name=name, img=img)
 
 
