@@ -48,12 +48,17 @@ class RGBHandler:
         self.matrix = None
         self.rgb_thread = None
         self.alive = False
+        self.options = dict(brightness=100, power=True)
 
     def _start_rgb(self, brightness):
         options = RGBMatrixOptions()
         options.rows = 32
         options.cols = 32
-        options.brightness = brightness
+        if brightness is None:
+            options.brightness = self.options["brightness"]
+        else:
+            options.brightness = brightness
+            self.options["brightness"] = brightness
         self.matrix = RGBMatrix(options=options)
         # img = Image.open("testimg2.png")
         # img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
@@ -68,18 +73,23 @@ class RGBHandler:
             # offset_canvas = matrix.SwapOnVSync(offset_canvas)
             print("alive at", time.strftime("%H:%M:%S", time.localtime()))
             time.sleep(1)
-        del self.matrix
 
-    def start(self, brightness=100):
+    def start(self, brightness=None):
+        self.options["power"] = True
         self.rgb_thread = threading.Thread(target=self._start_rgb, name="RGB Matrix", args=(brightness,))
         self.rgb_thread.start()
 
     def stop(self):
+        self.options["power"] = False
         self.alive = False
         if self.rgb_thread is not None:
             print("attempting to turn off matrix")
             self.rgb_thread.join()
-            del self.rgb_thread
+
+    def set_brightness(self, brightness):
+        self.options = brightness
+        self.stop()
+        self.start(brightness)
 
 
 rgb = RGBHandler()
@@ -87,8 +97,8 @@ rgb = RGBHandler()
 
 @app.route('/')
 def main_page():
-    power = dcfg["power"]
-    brightness = int(dcfg["brightness"])
+    power = rgb.options["power"]
+    brightness = rgb.options["brightness"]
     token = dcfg["token"]
     name = sp.me()["display_name"] if sp is not None else ""
     img = sp.me()["images"][0]["url"] if sp is not None else ""
@@ -123,15 +133,11 @@ def handle_login_callback():
 @app.route('/power', methods=["POST"])
 def handle_power():
     power = request.form["power"]
-    brightness = int(dcfg["brightness"])
     if power == "on":
-        write_cfg("power", power)
-        rgb.start(brightness)
+        rgb.start()
         print("RGB thread: ", rgb.rgb_thread)
     else:
         rgb.stop()
-        print("RGB thread: ", rgb.rgb_thread if hasattr(rgb, "rgb_thread") else "undefined")
-        write_cfg("power", power)
     return redirect('/')
 
 
