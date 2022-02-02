@@ -130,7 +130,7 @@ def handle_power():
         print("RGB thread: ", rgb.rgb_thread)
     else:
         rgb.stop()
-        print("RGB thread: ", rgb.rgb_thread)
+        print("RGB thread: ", rgb.rgb_thread if hasattr(rgb, "rgb_thread") else "undefined")
         write_cfg("power", power)
     return redirect('/')
 
