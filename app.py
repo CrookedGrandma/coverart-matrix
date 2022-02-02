@@ -151,9 +151,8 @@ def handle_login_callback():
     auth = spotipy.SpotifyOAuth()
     token = auth.get_access_token(code=code, as_dict=False)
     write_cfg("token", token)
-    global sp
-    sp = spotipy.Spotify(auth=token)
-    test_sp_connection()
+    rgb.sp = spotipy.Spotify(auth=token)
+    rgb.test_sp_connection()
     return redirect("/")
 
 
@@ -173,7 +172,6 @@ def handle_brightness():
     brightness = int(request.form["brightness"])
     print("Brightness at route:", brightness)
     rgb.set_brightness(brightness)
-    # restart RGB with given brightness
     return redirect('/')
 
 
