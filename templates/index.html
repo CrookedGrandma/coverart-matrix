@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spotify Coverart</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/static/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        @media (max-width: 768px) {
+            #img-loggedin {
+                width: 128px;
+            }
+        }
+
+        body {
+            padding-top: 5rem;
+        }
+
+        form {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Spotify Coverart</a>
+    </div>
+</nav>
+
+<main class="container">
+
+    <div class="py-5 px-3">
+        {% if token=='' %}
+            <h1>Login to Spotify</h1>
+            <form action="/login" method="POST">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        {% else %}
+            <p>Logged in: {{ name }}</p>
+            <img id="img-loggedin" src="{{ img }}" width="64px" alt="profile picture">
+            <hr>
+            <h1>Settings</h1>
+            <form action="/brightness" method="POST">
+                <div class="form-group">
+                    <label for="formControlRange">Brightness</label>
+                    <input min="10" type="range" class="form-control-range" id="formControlRange" step="10"
+                           name="brightness" value="{{ brightness }}">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+            </form>
+            <form action="/power" method="POST">
+                <div class="form-group">
+                    <label>Power</label>
+                    <input {% if power=='on' %} disabled="disabled" {% endif %} type="submit" name="power"
+                                                class="btn btn-success" value="on"/>
+                    <input {% if power=='off' %} disabled="disabled" {% endif %} type="submit" name="power"
+                                                 class="btn btn-danger" value="off"/>
+                </div>
+            </form>
+        {% endif %}
+    </div>
+
+</main>
+
+
+<script src="/static/bootstrap.min.js"></script>
+
+
+</body>
+</html>
