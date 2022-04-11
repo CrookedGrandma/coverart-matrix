@@ -43,8 +43,7 @@ try:
             if newBrightness != currentBrightness:
                 currentBrightness = newBrightness
                 print(f"Setting brightness to {currentBrightness}")
-                options.brightness = currentBrightness
-                matrix = RGBMatrix(options=options)
+                matrix.brightness = currentBrightness
             for x in range(0, matrix.width):
                 for y in range(0, matrix.height):
                     # offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
