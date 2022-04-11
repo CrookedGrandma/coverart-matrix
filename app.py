@@ -8,7 +8,7 @@ from configparser import ConfigParser
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect
 from io import BytesIO
-# from rgbmatrix import RGBMatrix, RGBMatrixOptions
+from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from PIL import Image
 from urllib.parse import urlencode
 
@@ -31,12 +31,20 @@ options.brightness = 100
 matrix = RGBMatrix(options=options)
 offset_canvas = matrix.CreateFrameCanvas()
 
+currentBrightness = 100
+
 
 try:
     while True:
         power = requests.get("https://web.djkhas.com/coverart/getpower.php", headers=headers).text
         if power == "on":
             # px = get_img()
+            newBrightness = int(requests.get("https://web.djkhas.com/coverart/getbrightness.php", headers=headers).text)
+            if newBrightness != currentBrightness:
+                currentBrightness = newBrightness
+                print(f"Setting brightness to {currentBrightness}")
+                options.brightness = currentBrightness
+                matrix = RGBMatrix(options=options)
             for x in range(0, matrix.width):
                 for y in range(0, matrix.height):
                     # offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
