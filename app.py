@@ -17,10 +17,18 @@ from urllib.parse import urlencode
 
 load_dotenv()
 scope = "user-read-currently-playing"
+getstatusurl = "https://web.djkhas.com/coverart/getstatus.php"
+setstatusurl = "https://web.djkhas.com/coverart/setstatus.php"
 headers = {"User-Agent": "Mozilla/5.0"}
 
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, open_browser=False))
 
+
+def setstatus(prop, value):
+    requests.post(setstatusurl, headers=headers, json={
+        'property': prop,
+        'value': value,
+    })
 
 def screen_off(mat):
     mat.SwapOnVSync(mat.CreateFrameCanvas())
@@ -82,11 +90,21 @@ if __name__ == "__main__":
     try:
         starttime = time.time()
         while True:
-            status = json.loads(requests.get("https://web.djkhas.com/coverart/getstatus.php", headers=headers).text)
+            status = json.loads(requests.get(getstatusurl, headers=headers).text)
             if status["req_login"] > 0:
-                # handle login request
+                # Login
+                setstatus("req_login", "0")
+                server.handle_request()
+                server.handle_request()
+                screen_off(matrix)
+            elif status["req_login"] < 0:
+                # Logout
+                setstatus("req_login", "0")
+                if os.path.exists(".cache"):
+                    os.remove(".cache")
                 screen_off(matrix)
             elif status["power"] == "on":
+                # Power on
                 # px = get_img()
                 newBrightness = status["brightness"]
                 if newBrightness != currentBrightness:
@@ -99,6 +117,7 @@ if __name__ == "__main__":
                         offset_canvas.SetPixel(x, y, 255, 0, 0)
                 offset_canvas = matrix.SwapOnVSync(offset_canvas)
             else:
+                # Power off
                 screen_off(matrix)
             time.sleep(interval - ((time.time() - starttime) % interval))
     except KeyboardInterrupt:
