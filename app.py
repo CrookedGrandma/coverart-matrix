@@ -5,15 +5,11 @@ import requests
 import socketserver
 import spotipy
 import time
-import threading
-from configparser import ConfigParser
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, redirect
 from io import BytesIO
 from rgbmatrix import RGBMatrix, RGBMatrixOptions
 from spotipy import SpotifyOAuth
 from PIL import Image
-from urllib.parse import urlencode
 
 load_dotenv()
 scope = "user-read-currently-playing"
