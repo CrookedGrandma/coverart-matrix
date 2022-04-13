@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import os
 import requests
@@ -33,14 +34,20 @@ if __name__ == "__main__":
     matrix = RGBMatrix(options=options)
     offset_canvas = matrix.CreateFrameCanvas()
 
+    interval = 5.0
+
     currentBrightness = 100
-    
+
     try:
+        starttime = time.time()
         while True:
-            power = requests.get("https://web.djkhas.com/coverart/getpower.php", headers=headers).text
-            if power == "on":
+            status = json.loads(requests.get("https://web.djkhas.com/coverart/getstatus.php", headers=headers).text)
+            if status["req_login"] > 0:
+                # handle login request
+                screen_off(matrix)
+            elif status["power"] == "on":
                 # px = get_img()
-                newBrightness = int(requests.get("https://web.djkhas.com/coverart/getbrightness.php", headers=headers).text)
+                newBrightness = status["brightness"]
                 if newBrightness != currentBrightness:
                     currentBrightness = newBrightness
                     print(f"Setting brightness to {currentBrightness}")
@@ -52,7 +59,7 @@ if __name__ == "__main__":
                 offset_canvas = matrix.SwapOnVSync(offset_canvas)
             else:
                 screen_off(matrix)
-            time.sleep(5)
+            time.sleep(interval - ((time.time() - starttime) % interval))
     except KeyboardInterrupt:
         screen_off(matrix)
         print("Program exited.")
