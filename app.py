@@ -126,7 +126,7 @@ if __name__ == "__main__":
             else:
                 # Power off
                 print("Power off")
-                # screen_off(matrix)
+                screen_off(matrix)
             time.sleep(interval - ((time.time() - starttime) % interval))
     except KeyboardInterrupt:
         screen_off(matrix)
