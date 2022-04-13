@@ -96,8 +96,11 @@ if __name__ == "__main__":
                 # Login
                 print("Login request")
                 setstatus("req_login", "0")
+                print("Waiting for login prompt...")
                 server.handle_request()
-                server.handle_request()
+                if not check_login():
+                    print("Waiting for return code...")
+                    server.handle_request()
                 screen_off(matrix)
             elif status["req_login"] < 0:
                 # Logout
