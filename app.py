@@ -90,42 +90,48 @@ if __name__ == "__main__":
     try:
         starttime = time.time()
         while True:
-            print("tick")
-            status = json.loads(requests.get(getstatusurl, headers=headers).text)
-            if status["req_login"] > 0:
-                # Login
-                print("Login request")
-                setstatus("req_login", "0")
-                print("Waiting for login prompt...")
-                server.handle_request()
-                if not check_login():
-                    print("Waiting for return code...")
+            try:
+                print("tick")
+                status = json.loads(requests.get(getstatusurl, headers=headers).text)
+                if status["req_login"] > 0:
+                    # Login
+                    print("Login request")
+                    setstatus("req_login", "0")
+                    print("Waiting for login prompt...")
                     server.handle_request()
-                screen_off(matrix)
-            elif status["req_login"] < 0:
-                # Logout
-                print("Logout request")
-                setstatus("req_login", "0")
-                if os.path.exists(".cache"):
-                    os.remove(".cache")
-                screen_off(matrix)
-            elif status["power"] == "on":
-                # Power on
-                print("Power on")
-                # px = get_img()
-                newBrightness = status["brightness"]
-                if newBrightness != currentBrightness:
-                    currentBrightness = newBrightness
-                    print(f"Setting brightness to {currentBrightness}")
-                    matrix.brightness = currentBrightness
-                for x in range(0, matrix.width):
-                    for y in range(0, matrix.height):
-                        # offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
-                        offset_canvas.SetPixel(x, y, 255, 0, 0)
-                offset_canvas = matrix.SwapOnVSync(offset_canvas)
-            else:
-                # Power off
-                print("Power off")
+                    if not check_login():
+                        print("Waiting for return code...")
+                        server.handle_request()
+                    screen_off(matrix)
+                elif status["req_login"] < 0:
+                    # Logout
+                    print("Logout request")
+                    setstatus("req_login", "0")
+                    if os.path.exists(".cache"):
+                        os.remove(".cache")
+                    screen_off(matrix)
+                elif status["power"] == "on":
+                    # Power on
+                    print("Power on")
+                    # px = get_img()
+                    newBrightness = status["brightness"]
+                    if newBrightness != currentBrightness:
+                        currentBrightness = newBrightness
+                        print(f"Setting brightness to {currentBrightness}")
+                        matrix.brightness = currentBrightness
+                    for x in range(0, matrix.width):
+                        for y in range(0, matrix.height):
+                            # offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
+                            offset_canvas.SetPixel(x, y, 255, 0, 0)
+                    offset_canvas = matrix.SwapOnVSync(offset_canvas)
+                else:
+                    # Power off
+                    print("Power off")
+                    screen_off(matrix)
+            except KeyboardInterrupt:
+                raise
+            except Exception as e:
+                print(f"Skipping tick -- error found: {e}")
                 screen_off(matrix)
             time.sleep(interval - ((time.time() - starttime) % interval))
     except KeyboardInterrupt:
