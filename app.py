@@ -127,4 +127,5 @@ if __name__ == "__main__":
             time.sleep(interval - ((time.time() - starttime) % interval))
     except KeyboardInterrupt:
         screen_off(matrix)
+        server.server_close()
         print("Program exited.")
