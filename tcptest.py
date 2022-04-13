@@ -38,9 +38,9 @@ class MyTCP(socketserver.BaseRequestHandler):
                 if check_login():
                     self.request.sendall(bytes(str(f"LOGGEDIN:{sp.me()['display_name']}"), "utf-8"))
                 else:
-                    self.request.sendall(b"login failed")
-            except spotipy.SpotifyOauthError:
-                self.request.sendall(b"login failed")
+                    self.request.sendall(b"login failed: login not set")
+            except spotipy.SpotifyOauthError as e:
+                self.request.sendall(bytes(f"login failed: {e.error_description}", "utf-8"))
         else:
             self.request.sendall(b"wrong request")
 
