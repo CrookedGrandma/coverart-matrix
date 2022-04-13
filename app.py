@@ -30,11 +30,24 @@ def setstatus(prop, value):
         'value': value,
     })
 
-def screen_off(mat):
-    mat.SwapOnVSync(mat.CreateFrameCanvas())
+def screen_off():
+    matrix.SwapOnVSync(matrix.CreateFrameCanvas())
 
-def get_img():
-    raise NotImplementedError()
+def black_screen():
+    return np.zeros((matrix.width, matrix.height, 3))
+
+def get_img(currentimgurl, currentimgarray):
+    track = sp.current_user_playing_track()
+    if track is None:
+        return None, black_screen()
+    url = track["item"]["album"]["images"][0]["url"]
+    if url == currentimgurl:
+        return currentimgurl, currentimgarray
+    img = Image.open(BytesIO(requests.get(url).content))
+    img.thumbnail((matrix.width, matrix.height), Image.ANTIALIAS)
+    img = img.convert("RGB")
+    array = np.array(img)
+    return url, array
 
 def check_login():
     auth = sp.auth_manager
@@ -86,6 +99,8 @@ if __name__ == "__main__":
     interval = 5.0
 
     currentBrightness = 100
+    currentImgUrl = None
+    currentImgArray = None
 
     try:
         starttime = time.time()
@@ -102,18 +117,19 @@ if __name__ == "__main__":
                     if not check_login():
                         print("Waiting for return code...")
                         server.handle_request()
-                    screen_off(matrix)
+                    screen_off()
                 elif status["req_login"] < 0:
                     # Logout
                     print("Logout request")
                     setstatus("req_login", "0")
                     if os.path.exists(".cache"):
                         os.remove(".cache")
-                    screen_off(matrix)
+                    screen_off()
                 elif status["power"] == "on":
                     # Power on
                     print("Power on")
-                    # px = get_img()
+                    currentImgUrl, currentImgArray = get_img(currentImgUrl, currentImgArray)
+                    px = currentImgArray
                     newBrightness = status["brightness"]
                     if newBrightness != currentBrightness:
                         currentBrightness = newBrightness
@@ -121,20 +137,19 @@ if __name__ == "__main__":
                         matrix.brightness = currentBrightness
                     for x in range(0, matrix.width):
                         for y in range(0, matrix.height):
-                            # offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
-                            offset_canvas.SetPixel(x, y, 255, 0, 0)
+                            offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
                     offset_canvas = matrix.SwapOnVSync(offset_canvas)
                 else:
                     # Power off
                     print("Power off")
-                    screen_off(matrix)
+                    screen_off()
             except KeyboardInterrupt:
                 raise
             except Exception as e:
                 print(f"Skipping tick -- error found: {e}")
-                screen_off(matrix)
+                screen_off()
             time.sleep(interval - ((time.time() - starttime) % interval))
     except KeyboardInterrupt:
-        screen_off(matrix)
+        screen_off()
         server.server_close()
         print("Program exited.")
