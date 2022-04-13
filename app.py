@@ -90,6 +90,7 @@ if __name__ == "__main__":
     try:
         starttime = time.time()
         while True:
+            print("tick")
             status = json.loads(requests.get(getstatusurl, headers=headers).text)
             if status["req_login"] > 0:
                 # Login
@@ -118,7 +119,8 @@ if __name__ == "__main__":
                 offset_canvas = matrix.SwapOnVSync(offset_canvas)
             else:
                 # Power off
-                screen_off(matrix)
+                # screen_off(matrix)
+                print("off")
             time.sleep(interval - ((time.time() - starttime) % interval))
     except KeyboardInterrupt:
         screen_off(matrix)
