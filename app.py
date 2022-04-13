@@ -81,7 +81,7 @@ if __name__ == "__main__":
     options.rows = 32
     options.cols = 32
     matrix = RGBMatrix(options=options)
-    # offset_canvas = matrix.CreateFrameCanvas()
+    offset_canvas = matrix.CreateFrameCanvas()
 
     interval = 5.0
 
@@ -98,14 +98,14 @@ if __name__ == "__main__":
                 setstatus("req_login", "0")
                 server.handle_request()
                 server.handle_request()
-                # screen_off(matrix)
+                screen_off(matrix)
             elif status["req_login"] < 0:
                 # Logout
                 print("Logout request")
                 setstatus("req_login", "0")
                 if os.path.exists(".cache"):
                     os.remove(".cache")
-                # screen_off(matrix)
+                screen_off(matrix)
             elif status["power"] == "on":
                 # Power on
                 print("Power on")
@@ -115,11 +115,11 @@ if __name__ == "__main__":
                     currentBrightness = newBrightness
                     print(f"Setting brightness to {currentBrightness}")
                     matrix.brightness = currentBrightness
-                # for x in range(0, matrix.width):
-                #     for y in range(0, matrix.height):
-                #         # offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
-                #         offset_canvas.SetPixel(x, y, 255, 0, 0)
-                # offset_canvas = matrix.SwapOnVSync(offset_canvas)
+                for x in range(0, matrix.width):
+                    for y in range(0, matrix.height):
+                        # offset_canvas.SetPixel(x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
+                        offset_canvas.SetPixel(x, y, 255, 0, 0)
+                offset_canvas = matrix.SwapOnVSync(offset_canvas)
             else:
                 # Power off
                 print("Power off")
