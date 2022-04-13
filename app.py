@@ -94,18 +94,21 @@ if __name__ == "__main__":
             status = json.loads(requests.get(getstatusurl, headers=headers).text)
             if status["req_login"] > 0:
                 # Login
+                print("Login request")
                 setstatus("req_login", "0")
                 server.handle_request()
                 server.handle_request()
                 screen_off(matrix)
             elif status["req_login"] < 0:
                 # Logout
+                print("Logout request")
                 setstatus("req_login", "0")
                 if os.path.exists(".cache"):
                     os.remove(".cache")
                 screen_off(matrix)
             elif status["power"] == "on":
                 # Power on
+                print("Power on")
                 # px = get_img()
                 newBrightness = status["brightness"]
                 if newBrightness != currentBrightness:
@@ -119,8 +122,8 @@ if __name__ == "__main__":
                 offset_canvas = matrix.SwapOnVSync(offset_canvas)
             else:
                 # Power off
+                print("Power off")
                 # screen_off(matrix)
-                print("off")
             time.sleep(interval - ((time.time() - starttime) % interval))
     except KeyboardInterrupt:
         screen_off(matrix)
