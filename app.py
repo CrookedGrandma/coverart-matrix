@@ -135,8 +135,8 @@ if __name__ == "__main__":
                         currentBrightness = newBrightness
                         print(f"Setting brightness to {currentBrightness}")
                         matrix.brightness = currentBrightness
-                    for x in range(0, matrix.width):
-                        for y in range(0, matrix.height):
+                    for y in range(0, matrix.height):
+                        for x in range(0, matrix.width):
                             offset_canvas.SetPixel(matrix.width - x, y, px[x, y, 0], px[x, y, 1], px[x, y, 2])
                     offset_canvas = matrix.SwapOnVSync(offset_canvas)
                 else:
